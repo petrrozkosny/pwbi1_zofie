@@ -1,0 +1,182 @@
+
+DEFINE
+-- ================================= UVODNI MIRY ================================
+MEASURE data[01 suma srazek] = 
+-- respektujeme filtry vizualu, zadne nepridavame, nerusime, tj. staci zakladni agregacni funkce
+SUM(data[srazky])
+MEASURE data[02 suma srazek ruzyne] = 
+-- respektujeme filtry vizualu, pridavame filtr na sloupec [lokalita], tj. potrebujeme kombinaci SUMX(FILTER())
+-- funkce SUMX() prijima jako prvni argument tabulku vracenou funkci FILTER(), kterou nasledne agreguje pres sloupec [srazky]
+SUMX(
+	-- funkce FILTER() aplikuje filtry a vraci zafiltrovanou tabulku
+	FILTER(
+		-- tabulka datoveho modelu, na kterou aplikujeme novy filtr
+		data
+		-- k existujicimu filtru vizualu pridavame filtr nad sloupcem [lokalita]
+		,data[lokalita] = "RUZYNE")
+-- sloupec, u ktereho dochazi k agregaci
+,data[srazky])
+MEASURE data[03 suma srazek vse]=
+-- rusime filtry vizualu, zadne nepridavame, tj. potrebujeme kombinaci SUMX(ALL())
+-- funkce SUMX() scita sloupec [srazky] tabulky vracene funkci ALL()
+SUMX(
+	-- funkce ALL() vraci kopii tabulky data zbavenou vsech filtru
+	ALL(data)
+-- sloupec, u ktereho dochazi k agregaci
+,data[srazky])
+MEASURE data[04 suma srazek rok 2000] = 
+-- rusime filtry vizualu a nastavujeme vlastni, tj. potrebujeme kombinaci SUMX(FILTER(ALL()))
+-- krok3: scitame hodnoty sloupc [srazky]
+SUMX(
+	-- krok2: nastavujeme filtr na sloupec [rok]
+	FILTER(
+		-- krok1: rusime filtry vizualu
+		ALL(data)
+	,data[rok] = 2000),
+data[srazky])
+-- ================================= UVODNI MIRY ================================
+
+
+-- ================================= CVICENI 1 ==================================
+/*
+Miry ocekavaji tabulku se sloupcem data[rok]
+*/
+MEASURE data[05 suma srazek mesic 7]= 
+-- K existujicimu filtru vizualu pridavame filtr nad sloupcem [mesic]
+SUMX(FILTER(data,data[mesic]= 7),data[srazky])
+MEASURE data[06 suma srazek mosnov] = 
+-- K existujicimu filtru pridavame filtr nad sloupcem [lokalita]
+SUMX(FILTER(data,data[lokalita] = "MOSNOV"),data[srazky])
+MEASURE data[07 suma srazek mesic 1] = 
+-- K existujicimu filtru pridavame filtr nad sloupcem [mesic]
+SUMX(FILTER(data,data[mesic]= 1),data[srazky])
+MEASURE data[08 suma srazek mesic 1 ruzyne] = 
+-- K existujicimu filtru pridavame filtry nad sloupci [mesic] a [lokalita], 
+-- operator && znaci podminku "a zaroven", tj. musi byt splneny obe podminky
+SUMX(FILTER(data,data[mesic]= 1 && data[lokalita]= "RUZYNE"),data[srazky])
+MEASURE data[09 suma srazek mesice 7 8] = 
+-- K existujicimu filtru pridavame filtry nad sloupcem [mesic]
+-- operator || znaci podminku "nebo", tj.  musi byt splnena alespon jedna ze dvou podminek
+SUMX(FILTER(data,data[mesic]= 7 || data[mesic] = 8),data[srazky])
+MEASURE data[10 suma srazek mosnov mesic 8 ] = 
+-- K existujicimu filtru pridavame filtry nad sloupci [mesic] a [lokalita], 
+-- operator && znaci podminku "a zaroven", tj. musi byt splneny obe podminky
+SUMX(FILTER(data,data[mesic]= 8 && data[lokalita]= "MOSNOV"),data[srazky])
+
+MEASURE data[11 suma srazek vsechny roky] = 
+-- Rusime existujici filtry (filtry vizualu) a nenastavujeme dalsi
+SUMX(ALL(data),data[srazky])
+MEASURE data[12 suma srazek vsechny lokality] =
+-- Sloupec [lokalita] neni filtrovan, tj. neni treba nic rusit
+SUM(data[srazky])
+
+-- ================================= CVICENI 1 ==================================
+
+-- ================================= Samostatne cviceni 1 =======================
+/*
+Miry ocekavaji tabulku se sloupcem data[rok]
+*/
+MEASURE data[cv01 suma srazek mosnov] =
+-- Respektujeme filtry vizualu, pridavame dalsi
+SUMX(FILTER(data,data[lokalita] = "MOSNOV"),data[srazky])
+MEASURE data[cv02 suma srazek] =
+-- Respektujeme filtry vizualu, zadne nepridavame a nerusime
+SUM(data[srazky])
+MEASURE data[cv03 suma srazek mesic 7] =
+-- Respektujeme filtry vizualu, pridavame dalsi
+SUMX(FILTER(data,data[mesic] = 7),data[srazky])
+
+-- ================================= Samostatne cviceni 1 =======================
+
+-- ================================= Samostatne cviceni 2 =======================
+/*
+Miry ocekavaji tabulku se sloupcem data[rok]
+*/
+MEASURE data[cv04 maximalni srazky] =
+-- Respektujeme filtry vizualu, zadne nepridavame
+MAX(data[srazky])
+MEASURE data[cv05 maximalni srazky mosnov] = 
+-- Respektujeme filtry vizualu, pridavame filtr nad data[lokalita]
+MAXX(FILTER(data,data[lokalita] = "MOSNOV"),data[srazky])
+MEASURE data[cv06 maximalni srazky mosnov mesic 7] = 
+-- Respektujeme filtry vizualu, pridavame filtr nad data[lokalita], data[mesic]
+MAXX(FILTER(data,data[lokalita] = "MOSNOV" && data[mesic] = 7),data[srazky])
+
+-- ================================= Samostatne cviceni 2 =======================
+
+-- ================================= Samostatne cviceni 3 =======================
+/*
+Miry ocekavaji tabulku se sloupcem data[lokalita]
+*/
+MEASURE data[cv07 maximalni srazky] =
+-- Respektujeme filtry vizualu, zadne nepridavame
+MAX(data[srazky])
+MEASURE data[cv08 maximalni srazky rok 2000] =
+-- Respektujeme filtry vizualu, pridavame filtr nad data[rok]
+MAXX(FILTER(data,data[rok] = 2000),data[srazky])
+MEASURE data[cv09 maximalni srazky mesic 7 nebo mesic 8] =
+-- Respektujeme filtry vizualu, pridavame filtr na data[mesic]
+MAXX(FILTER(data,data[mesic] = 7 || data[mesic] = 8),data[srazky])
+MEASURE data[cv10 maximalni datum] =
+-- Respektujeme filtry vizualu, zadne nepridavame
+MAX(data[datum])
+MEASURE data[cv11 maximalni srazky v maximalnim datumu] = 
+-- Respektujeme filtry vizualu, pridavame dalsi
+MAXX(FILTER(data,data[datum] = MAX(data[datum])),data[srazky])
+
+-- ================================= Samostatne cviceni 4 =======================
+
+/*
+Miry ocekavaji tabulku se sloupci data[rok] a data[mesic]
+*/
+MEASURE data[cv12 suma srazek] = 
+-- Respektujeme filtry vizualu, zadne nepridavame
+SUM(data[srazky])
+MEASURE data[cv13 suma srazek ruzyne] = 
+-- Respektujeme filtry vizualu, pridavame filtr nad data[lokalita]
+SUMX(FILTER(data,data[lokalita] = "RUZYNE"),data[srazky])
+MEASURE data[cv14 suma srazek ruzyne predchozi rok] = 
+-- Potrebujeme zmenit, tj. zrusit a znovu nastavit filtr nad data[rok]
+SUMX(FILTER(ALL(data),data[rok] = SELECTEDVALUE(data[rok]) - 1 && data[mesic] = SELECTEDVALUE(data[mesic])),data[srazky])
+MEASURE data[cv15 suma srazek mezirocne] =
+-- Zde pocitame sumu srazek za rok a mesic na radku vizualu
+SUM(data[srazky])
+-
+-- Zde pocitame sumu srazek za stejny mesic, predchozi rok. Tj. potrebujeme zmenit (zrusit a znovu nastavit) filtr nad data[rok]
+SUMX(FILTER(ALL(data),data[rok] = SELECTEDVALUE(data[rok]) - 1  && data[mesic] = SELECTEDVALUE(data[mesic])),data[srazky])
+
+-- ================================= Samostatne cviceni 4 =======================
+
+-- ================================= Samostatne cviceni 5 =======================
+/*
+Miry ocekavaji tyto vizualy:
+- prurez nad data[lokalita] omezeny na jediny vyber
+- prurez nad data[rok] omezeny na jediny vyber
+- spojnicovy graf s data[mesic] na osa x
+- karta
+*/
+
+MEASURE data[cv16 suma srazek] = 
+-- Respektujeme filtry vizualu
+SUM(data[srazky])
+
+MEASURE data[cv17 suma srazek predchozi rok] = 
+-- Potrebujeme zmenit, tj. zrusit a znovu nastavit, filtr nad data[rok]
+SUMX(FILTER(ALL(data),data[rok] = SELECTEDVALUE(data[rok]) - 1 && data[mesic] = SELECTEDVALUE(data[mesic]) && data[lokalita] = SELECTEDVALUE(data[lokalita])),data[srazky])
+MEASURE data[cv18 nadpis grafu] = 
+-- Respektujeme filtry vizualu, zadne nepridavame
+"Vývoj srážek v lokalitě "&SELECTEDVALUE(data[lokalita]) &", roce "&SELECTEDVALUE(data[rok])
+
+MEASURE data[cv19 srazky mezirocne] =
+-- V teto casti respektujeme filtr vizualu
+SUM(data[srazky])
+-
+-- V teto casi potrebujeme zmenit, tj. zrusit a znovu nastavit filtr nad data[rok]
+SUMX(FILTER(ALL(data),data[rok] = SELECTEDVALUE(data[rok]) - 1  && data[mesic] = SELECTEDVALUE(data[mesic]) && data[lokalita] = SELECTEDVALUE(data[lokalita])),data[srazky])
+
+MEASURE data[cv20 srazky mezirocne barva] = 
+-- Vypocet jiz mame hotovy, nyni jej pouzijeme pro podminku
+IF([cv19 srazky mezirocne] < 0, "RED")
+-- ================================= Samostatne cviceni 5 =======================
+
+
