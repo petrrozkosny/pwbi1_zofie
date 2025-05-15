@@ -1,0 +1,8 @@
+nadpis grafu = 
+SWITCH(TRUE(),
+HASONEFILTER(data[lokalita]),
+"Vývoj srážek v lokalitě "&SELECTEDVALUE(data[lokalita]),
+ISFILTERED(data[lokalita]),
+"Vývoj srážek v lokalitách "&
+CONCATENATEX(DISTINCT(data[lokalita]),data[lokalita],", ",data[lokalita],ASC),
+"Vývoj srážek ve všech lokalitách")
